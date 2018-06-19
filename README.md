@@ -1,1 +1,1 @@
-# TrabalhoCG
+# Trabalho final de Computação Gráfica - UFRJ
