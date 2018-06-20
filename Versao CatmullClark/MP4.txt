@@ -1,0 +1,93 @@
+This is a Project done for a computer graphics class.
+
+Given a mesh of points, this program will perform catmull clark subdivison on those points
+
+
+the README I submitted for this project is below.
+
+
+
+
+CS 418 MP4 - Fall 2012
+Jeff Parsons
+
+"Smooth I"
+
+
+
+Instructions/control
+
+included in the MP is an executable, and a visual studio 2010 project file. if the executable doesn't work correctly,
+try the VS project file ( the project file is called MP2, as it is a modified version of my mp2 VS project)
+ i have included pictures in my mp folder to show what the I should look like
+
+Upon opening the MP executable, you should see a 3D, rainbow textured block I with lighting(including specularity). 
+
+The camera will be moving around the I following a Bezier curve.
+
+ 
+to subdivide the I, just press the "c" key. repeated presses will yeild additional subdivisions.
+(it should be possible to get up to 4 or 5 subdivisions of the original I before the animation starts to slow down)
+
+pressing the "m" key will switch between a full surfaced and textured I, and a wire mesh of the I.
+ 
+
+to reset a subdivided I to the original un-subdivided block-I, press the "v" key
+
+
+
+
+Breif Code documentation for Catmull clarke implementation:
+
+my catmull clark implementation is rather complicated, but I will attempt to discribe it as thouroughly as i can here,
+so that it is perhaps clearer in reading the code comments.
+
+data structures:
+I have implemented a half-edge data structure that uses the following classes:
+
+a "face" class, to represent a single face or quad in the mesh
+
+a "vertex" class, to represent a single point in the mesh
+
+a "halfEdge" class, to represent a single half edge in the half edge data structure.
+
+each vertex stores its coordinates, a normal vector, and a pointer to an outgoing half edge.
+
+each face carries pointers to its 4 vertices, as well as to a single bordering half edge. Each face also has the
+ability to store an additional "face point" which is the face center point calculated during the course of catmull-
+clark. 
+
+each half edge has a pointer to its face, to the next half edge in the same face, to its opposite half edge, and to its
+start and end vertices. In addition, each half edge has the potential to store a pointer to an "edge point" which is the 
+edge center point calculated during the course of catmull-clark. (in my implementation, opposite half edges will always 
+point to the same edge point vertex object.) 
+
+all faces are stored on the heap, with pointers to all faces stored in a single std::vector.
+this is also true for all vertices, and for all edges.  
+
+
+given these data structures, my implementation works as follows:
+
+a single function ( fullCC() ) calls all of the below functions in sequence:
+
+First, a function ( makeFacePoints() ) is called to calculate a face point for each face. pointers to these are stored 
+within each face object of the current face vector.
+
+Second, a function ( makeEdgePoints() )is called to calculate all new edge points and to store pointers to them within 
+each edge object.
+
+Third, a function ( makeAdjustedVerts() ) is called to adjust the positions of each vertex in the existing mesh based on 
+the values of the vertices stored in the edges and faces surrounding that vertex.
+
+fourth, a function ( compileNewMesh() ) is called to construct a new face vector and edge vector (with all new edges 
+and faces) by iterating over each face in the old face vector, and constructing all new faces and half edges connecting the 
+old vertices, edge points, and face points that are pointed to by the old halfedge and face data structures.
+(so, as each 1 face of the old face vector is iterated over, 4 new faces are created and pushed onto the new
+face vector) for each quadruple of faces being constructed, opposite edges of the bordering half edges are checked
+for and connected. 
+
+lastly, a function ( getNormals() ) iterates over every vertex in the new mesh, and computes normals for each one, 
+based on the normals of each surrounding face. 
+
+
+  

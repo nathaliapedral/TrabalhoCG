@@ -1,0 +1,13 @@
+
+PARA COMPILAR:
+g++ -o main main.cpp -lGL -lGLU -lglut
+
+RODAR: 
+./main
+
+COMANDOS: 
+c - subdivide (vai começar a ficar mais lento depois de umas 4)
+m - troca entre superficie com textura e poligono de controle
+v - reseta subdivisão
+
+
