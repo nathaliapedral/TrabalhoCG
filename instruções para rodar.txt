@@ -1,0 +1,4 @@
+Para rodar:
+
+>> gcc -o versao1 versao1.c -lGL -lGLU -lglut
+>> ./versao1
