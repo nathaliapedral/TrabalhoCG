@@ -50,7 +50,7 @@
  **/
 
 #include <stdlib.h>
-#include "SimpleNurbs.h"
+#include "versao1.h"
 #include <math.h>
 #include <limits.h>
 #include <GL/glut.h>	// OpenGL Graphics Utility Library
