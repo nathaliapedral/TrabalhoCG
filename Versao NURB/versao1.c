@@ -1,26 +1,19 @@
-/**************************************************
- * SimpleNurbs.c
- *
- * Program to demonstrate how to form a single
- *    NURBS patch -- or to be more precise, 
- *    a rational Bezier patch. 
- *
- * Author: Samuel R. Buss
- *
- * Software accompanying the book
- *		3D Computer Graphics: A Mathematical Introduction with OpenGL,
- *		by S. Buss, Cambridge University Press, 2003.
- *
- * Software is "as-is" and carries no warranty.  It may be used without
- *   restriction, but if you modify it, please change the filenames to
- *   prevent confusion between different versions.
- * Bug reports: Sam Buss, sbuss@ucsd.edu.
- * Web page: http://math.ucsd.edu/~sbuss/MathCG
- *
- * USAGES: There are a number of keyboard commands that control 
- * the animation.  They must be typed into the graphics window, 
- * and are listed below:
- *
+/*
+
+CG - Trabalho Final
+Grupo: Igor, Nathalia & Yves
+
+*** !!!! Falta descrição geral do programa (explicar o que faz) 
+
+
+
+
+
+* Usabilidade: Os comandos são controlados via teclado. Segue sua lista:
+
+** !!! FALTA TRADUÇÃO
+
+
  * CONTROLLING RESOLUTION OF THE NURBS MESH
  *   Press "U" to increase the number samples in U direction.
  *   Press "u" to decrease the number samples in U direction.
@@ -43,9 +36,6 @@
  *   Pressing "p" toggles between wireframe and polygon mode.
  *   Pressing "f" key toggles between flat and smooth shading.
  *
- * FOR CONTROL POINTS AT INFINITY.  Change the value of the
- *   variable USE_CNTLPT_AT_INFINITY from 0 to 1 and recompile.
- *   Should be identical in functionality.
  *
  **/
 
@@ -53,26 +43,13 @@
 #include "versao1.h"
 #include <math.h>
 #include <limits.h>
-#include <GL/glut.h>	// OpenGL Graphics Utility Library
+#include <GL/glut.h>	
 
-// Set next variable to 1 to use 3x4 patch with control points at infinity
-//	Set it to 0 to use 4x4 patch without control points at infinity.
-//  You must recompile to switch modes
-#define USE_CNTLPT_AT_INFINITY 0
 
-// Control points for the 4x4 Bezier patch. (No points at infinity.)
-const float circularStrip[4][4][4] = {
-	{ {-2, -1, 0, 1}, { -0.6667, -0.3333, 1.3333, 0.3333},
-							{ 0.6667, -0.3333, 1.3333, 0.3333}, { 2, -1, 0, 1 } },
-	{ {-3, 0, 0, 1}, { -1, 0, 2, 0.3333 }, 
-							{ 1, 0, 2, 0.3333}, { 3, 0, 0, 1}},
-	{ {-1.5, 0.5, 0, 1}, {-0.5, 0.1667, 1, 0.3333}, 
-							{0.5, 0.1667, 1, 0.3333}, {1.5, 0.5, 0, 1}},			
-	{ {-2, 1, 0, 1}, { -0.6667,  0.3333, 1.3333, 0.3333},
-							{ 0.6667,  0.3333, 1.3333, 0.3333}, { 2,  1, 0, 1 } }
-};
 
-// Control points for the 3x4 Bezier patch. (With points at infinity.)
+
+
+// Pontos para o retalho de Bezier
 const float circularStripInfty[4][3][4] = {
 	{ {-2, -1, 0, 1}, { 0, 0, 2, 0}, { 2, -1, 0, 1 } },
 	{ {-3, 0, 0, 1}, { 0, 0, 3, 0}, { 3, 0, 0, 1}},
@@ -80,174 +57,166 @@ const float circularStripInfty[4][3][4] = {
 	{ {-2, 1, 0, 1}, { 0, 0, 2, 0}, { 2,  1, 0, 1 } }
 };
 
-// Variables controlling the fineness of the polygonal mesh
-int NumUs = 4;
-int NumVs = 4;
+// Variaveis que controlam o refinamento do retalho
+int NumU = 4;
+int NumV = 4;
 
 const float PI2 = 2.0f*3.1415926535f;
 
-GLenum shadeModel = GL_FLAT;		// Toggles between GL_FLAT and GL_SMOOTH
-GLenum polygonMode = GL_LINE;		// Toggles between GL_LINE and GL_FILL
+GLenum shadeModel = GL_FLAT;		// Podendo alternar entre GL_FLAT e GL_SMOOTH
+GLenum polygonMode = GL_LINE;		// Podendo alternar entre GL_LINE e GL_FILL
 
-// Variables controlling the animation
+// Variaveis de rotacao
 GLenum runMode = GL_TRUE;
-float RotX = 0.0f;					// Rotational position around x-axis
-float RotY = 0.0f;					// Rotational position around y-axis
-float RotIncrementX = 0.0;			// Rotational increment, x-axis
-float RotIncrementY = 0.0;			// Rotational increment, y-axis
-const float RotIncFactor = 1.5;	// Factor change in rot rate per key stroke
+float RotX = 0.0f;					// Posicao de rotacao eixo X
+float RotY = 0.0f;					// Posicao de rotacao eixo Y
+float RotIncX = 0.0;					// Incrementa rotacao (eixo X)
+float RotIncY = 0.0;					// Incrementa rotacao (eixo Y)
+const float RotIncFactor = 1.5;				// Fator de rotacao a cada pressionada do teclado (pode imaginar como uma velocidade) 
 
-// Lighting values
+// Valores iluminacao
 float ambientLight[4] = {0.2, 0.2, 0.2, 1.0};
 float Lt0amb[4] = {0.1, 0.1, 0.1, 1.0};
 float Lt0diff[4] = {0.6, 0.6, 0.6, 1.0};
 float Lt0spec[4] = {1.0, 1.0, 1.0, 1.0};
-float Lt0pos[4] = {1.0, 0.0, 1.0, 0.0};			// Directional light
+float Lt0pos[4] = {1.0, 0.0, 1.0, 0.0};			// Luz direcional
 
 float Lt1amb[4] = {0.1, 0.1, 0.1, 1.0};
 float Lt1diff[4] = {0.6, 0.6, 0.6, 1.0};
 float Lt1spec[4] = {1.0, 1.0, 1.0, 1.0};
-float Lt1pos[4] = {0.0, 1.0, 1.0, 0.0};			// Directional light
+float Lt1pos[4] = {0.0, 1.0, 1.0, 0.0};			// Luz direcional
 
-// Material values
+// Variveis brilho/reflexão   !!!!!!!!! explicar melhor !!!!!!!!!!!
 float Noemit[4] = {0.0, 0.0, 0.0, 1.0};
 float Matspec[4] = {1.0, 1.0, 1.0, 1.0};
-float Matnonspec[4] = {0.8, 0.05, 0.4, 1.0};
-float Matshiny = 50.0;
+float Matnospec[4] = {0.8, 0.05, 0.4, 1.0};		// Sombra
+float Matshine = 50.0;					// Controla intensidade do brilho
 
-// glutKeyboardFunc is called below to set this function to handle
-//		all "normal" key presses.
-void myKeyboardFunc( unsigned char key, int x, int y ) 
+
+// Comandos do teclado
+void keyboardFunc( unsigned char key, int x, int y ) 
 {
 	switch ( key ) {
 	case 'a':
 		runMode = !runMode;
 		break;
-	case 's':
+	case 's':			// Movimento um passo de cada vez ("camera lenta" controlada pelo teclado)
 		runMode = GL_TRUE;
 		updateScene();
 		runMode = GL_FALSE;
 		break;
-	case 27:	// Escape key
+	case 27:			// Fecha a janela
 		exit(1);
-	case 'r':	// Reset the animation (resets everything)
+	case 'r':			// Reinicia tudo (volta ao esquema original)
 		ResetAnimation();
 		break;
-	case '0':	// Zero the rotation rates
+	case '0':			// Zera a rotacao
 		ZeroRotation();
 		break;
-	case 'f':	// Shade mode toggles from flat to smooth
-		ShadeModelToggle();
+	case 'f':			// Gradação --> alterna entre GL_FLAT e GL_SMOOTH
+		ShadeModelFunc();
 		break;
-	case 'p':	// Polygon mode toggles between fill and line
-		FillModeToggle();
+	case 'p':			// Formato do poligono --> alterna entre GL_LINE e GL_FILL
+		FillModeFunc();
 		break;
-	case 'u':	// Decrement number of U's
-		LessUs();
+	case 'u':			// Decrementa "u"
+		DecU();
 		break;
-	case 'U':	// Increment number of U's
-		MoreUs();
+	case 'U':			// Incrementa "u"
+		IncU();
 		break;
-	case 'v':	// Decrement number of V's
-		LessVs();
+	case 'v':			// Decrementa "v"
+		DecV();
 		break;
-	case 'V':	// Increment number of V's
-		MoreVs();
+	case 'V':			// Incrementa "v"
+		IncV();
 		break;
 	}
 }
 
-// glutSpecialFunc is called below to set this function to handle
-//		all "special" key presses.  See glut.h for the names of
-//		special keys.
-void mySpecialKeyFunc( int key, int x, int y ) 
+// Trata as quatro possibilidades de movimentos rotacionais (cima,baixo,esquerda,direita)
+void rotKeyFunc( int key, int x, int y ) 
 {
 	switch ( key ) {
-	case GLUT_KEY_UP:		
-		// Either increase upward rotation, or slow downward rotation
-		KeyUp();
+	case GLUT_KEY_UP:				
+		KeyUp();		// Aumenta rotação para cima ou diminui rotação para baixo
 		break;
 	case GLUT_KEY_DOWN:
-		// Either increase downwardward rotation, or slow upward rotation
-		KeyDown();
+		KeyDown();		// Aumenta rotação para baixo ou diminui rotação para cima
 		break;
 	case GLUT_KEY_LEFT:
-		// Either increase left rotation, or slow down rightward rotation.
-		KeyLeft();
+		KeyLeft();		// Aumenta rotação para esquerda ou diminui rotação para direita
 		break;
 	case GLUT_KEY_RIGHT:
-		// Either increase right rotation, or slow down leftward rotation.
-		KeyRight();
+		KeyRight();		// Aumenta rotação para direita ou diminiu rotação para esquerda
 		break;
 	}
 }
 
-// The routines below are coded so that the only way to change from 
-//	one direction of rotation to the opposite direction is to first 
-//  reset the animation, 
 
+// As quatro funções: KeyUp, KeyDown, KeyLeft e KeyRight limitam a mudança de direção de rotação apenas com "reset"
 void KeyUp() {
-    if ( RotIncrementX == 0.0 ) {
-		RotIncrementX = -0.1;		// Initially, one-tenth degree rotation per update
+    if ( RotIncX == 0.0 ) {
+		RotIncX = -0.1;		// Inicialmente 1/10 degrau de rotação por update (isso se repete para as 3 seguintes funções)
 	}
-	else if ( RotIncrementX < 0.0f) {
-		RotIncrementX *= RotIncFactor;
+/*	else if ( RotIncX < 0.0f) {
+		RotIncX *= RotIncFactor;
 	}
 	else {
-		RotIncrementX /= RotIncFactor;
-	}	
+		RotIncX /= RotIncFactor;
+	}	*/
 }
 
 void KeyDown() {
-    if ( RotIncrementX == 0.0 ) {
-		RotIncrementX = 0.1;		// Initially, one-tenth degree rotation per update
+    if ( RotIncX == 0.0 ) {
+		RotIncX = 0.1;		
 	}
-	else if ( RotIncrementX > 0.0f) {
-		RotIncrementX *= RotIncFactor;
+	else if ( RotIncX > 0.0f) {
+		RotIncX *= RotIncFactor;
 	}
 	else {
-		RotIncrementX /= RotIncFactor;
+		RotIncX /= RotIncFactor;
 	}	
 }
 
 void KeyLeft() {
-    if ( RotIncrementY == 0.0 ) {
-		RotIncrementY = -0.1;		// Initially, one-tenth degree rotation per update
+    if ( RotIncY == 0.0 ) {
+		RotIncY = -0.1;		
 	}
-	else if ( RotIncrementY < 0.0) {
-		RotIncrementY *= RotIncFactor;
+	else if ( RotIncY < 0.0) {
+		RotIncY *= RotIncFactor;
 	}
 	else {
-		RotIncrementY /= RotIncFactor;
+		RotIncY /= RotIncFactor;
 	}	
 }
 
 void KeyRight()
 {
-    if ( RotIncrementY == 0.0 ) {
-		RotIncrementY = 0.1;		// Initially, one-tenth degree rotation per update
+    if ( RotIncY == 0.0 ) {
+		RotIncY = 0.1;		
 	}
-	else if ( RotIncrementY > 0.0) {
-		RotIncrementY *= RotIncFactor;
+	else if ( RotIncY > 0.0) {
+		RotIncY *= RotIncFactor;
 	}
 	else {
-		RotIncrementY /= RotIncFactor;
+		RotIncY /= RotIncFactor;
 	}	
 }
 
 
-// Resets position and sets rotation rate back to zero.
+// Restaura posicao original e define rotação igual a zero.
 void ResetAnimation() {
-	RotX = RotY = RotIncrementX = RotIncrementY = 0.0;
+	RotX = RotY = RotIncX = RotIncY = 0.0;
 }
 
-// Sets rotation rates back to zero.
+// Restaura rotação para zero.
 void ZeroRotation() {
-	RotIncrementX = RotIncrementY = 0.0;
+	RotIncX = RotIncY = 0.0;
 }
 
-// Toggle between smooth and flat shading
-void ShadeModelToggle() {
+// Alterna entre GL_SMOOTH e GL_FLAT
+void ShadeModelFunc() {
 	if ( shadeModel == GL_FLAT ) {
 		shadeModel = GL_SMOOTH;
 	}
@@ -256,8 +225,8 @@ void ShadeModelToggle() {
 	}
 }
 
-// Toggle between line mode and fill mode for polygons.
-void FillModeToggle() {
+// Alterna entre GL_LINE e GL_FILL
+void FillModeFunc() {
 	if ( polygonMode == GL_LINE ) {
 		polygonMode = GL_FILL;
 	}
@@ -266,27 +235,27 @@ void FillModeToggle() {
 	}
 }
 
-// Increment number of U's
-void MoreUs() {
-	NumUs++;
+// Incrementa "u"
+void IncU() {
+	NumU++;
 }
 
-// Decrement number of U's
-void LessUs() {
-	if (NumUs>4) {
-		NumUs--;
+// Decrementa "u"
+void DecU() {
+	if (NumU>4) {
+		NumU--;
 	}
 }
 
-// Increment number of V's
-void MoreVs() {
-	NumVs++;
+// Incrementa "v"
+void IncV() {
+	NumV++;
 }
 
-// Decrement number of V's
-void LessVs() {
-	if (NumVs>4) {
-		NumVs--;
+// Decrementa "v"
+void DecV() {
+	if (NumV>4) {
+		NumV--;
 	}
 }
 
@@ -299,20 +268,20 @@ void updateScene( void )
 	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);	// Set to be "wire" or "solid"
 
 	// Bezier Patch Materials
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, Matnonspec);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, Matnospec);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Matspec);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, Matshiny);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, Matshine);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, Noemit);
 
 	glPushMatrix();		// Save to use again next time.
 
 	// Update the orientation, if the animation is running.
 	if ( runMode ) {
-		RotY += RotIncrementY;
+		RotY += RotIncY;
 		if ( fabs(RotY)>360.0 ) {
 			RotY -= 360.0*((int)(RotY/360.0));
 		}
-		RotX += RotIncrementX;
+		RotX += RotIncX;
 		if ( fabs(RotX)>360.0 ) {
 			RotX -= 360.0*((int)(RotX/360.0));
 		}
@@ -323,15 +292,12 @@ void updateScene( void )
 
 	// Draw the Bezier patch
  	glEnable(GL_MAP2_VERTEX_4);
-	if ( USE_CNTLPT_AT_INFINITY==0 ) {
-  		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,4, 0,1,16,4, &circularStrip[0][0][0] );
-	}
-	else {
-		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &circularStripInfty[0][0][0] );
+	
+	glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &circularStripInfty[0][0][0] );
 
-	}
-	glMapGrid2f( NumUs, 0,1, NumVs, 0, 1);
-	glEvalMesh2(GL_FILL, 0,NumUs, 0, NumVs);
+	
+	glMapGrid2f( NumU, 0,1, NumV, 0, 1);
+	glEvalMesh2(GL_FILL, 0,NumU, 0, NumV);
 
 	glPopMatrix();		// Restore to original matrix as set in resizeWindow()
 
@@ -401,18 +367,18 @@ int main( int argc, char** argv )
 	glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
-	// Window position (from top corner), and size (width and hieght)
+	// Posicao e tamanho da janela
     glutInitWindowPosition( 10, 60 );
-    glutInitWindowSize( 620, 160 );
+    glutInitWindowSize( 500, 500 );
     glutCreateWindow( "Versao 1 - Bezier aplicacao" );
 
 	// Initialize OpenGL rendering modes
     initRendering();
-	resizeWindow(620,160);
+	resizeWindow(500,500);
 
 	// Set up callback functions for key presses
-	glutKeyboardFunc( myKeyboardFunc );
-	glutSpecialFunc( mySpecialKeyFunc );
+	glutKeyboardFunc( keyboardFunc );
+	glutSpecialFunc( rotKeyFunc );
 
 	// Set up the callback function for resizing windows
     glutReshapeFunc( resizeWindow );
@@ -422,8 +388,7 @@ int main( int argc, char** argv )
 	// Call this whenever window needs redrawing
     glutDisplayFunc( updateScene );
 	
-	// Start the main loop.  glutMainLoop never returns.
 	glutMainLoop(  );
 
-    return(0);	// This line is never reached.
+    return(0);	
 }
