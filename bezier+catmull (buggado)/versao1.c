@@ -51,7 +51,7 @@ Grupo: Igor, Nathalia & Yves
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-int method_control = 0;	
+int method_control = 0;			// controla qual método usado (0 = Bezier, 1 = Catumull)
 
 GLfloat rot[] = { 20, 40, 0 };
 GLfloat rotx = 0, roty = 1;
