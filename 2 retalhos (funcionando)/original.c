@@ -36,43 +36,10 @@ Grupo: Igor, Nathalia & Yves
 #include <GL/glut.h>	
 
 
-#define NI 5
-#define NJ 4
-GLfloat inp[NI+1][NJ+1][3];
-#define RESOLUTIONI 10*NI
-#define RESOLUTIONJ 10*NJ
-GLfloat outp[RESOLUTIONI][RESOLUTIONJ][3];
 
 GLfloat zpos = -6;
 
-double BezierBlend(int k, double mu, int n)
-{
-   int nn,kn,nkn;
-   double blend=1;
 
-   nn = n;
-   kn = k;
-   nkn = n - k;
-
-   while (nn >= 1) {
-      blend *= nn;
-      nn--;
-      if (kn > 1) {
-         blend /= (double)kn;
-         kn--;
-      }
-      if (nkn > 1) {
-         blend /= (double)nkn;
-         nkn--;
-      }
-   }
-   if (k > 0)
-      blend *= pow(mu,(double)k);
-   if (n-k > 0)
-      blend *= pow(1-mu,(double)(n-k));
-
-   return(blend);
-}
 
 
 
@@ -406,43 +373,6 @@ void updateScene( void )
 	// Draw the Bezier patch
  	glEnable(GL_MAP2_VERTEX_4);
 
-	int i,j,ki,kj;
-   double mui,muj,bi,bj;
-
-   /* Create a random surface */
-   srandom(1111);
-   for (i=0;i<=NI;i++) {
-      for (j=0;j<=NJ;j++) {
-         inp[i][j][0] = i;
-         inp[i][j][1] = j;
-         inp[i][j][2] = (random() % 10000) / 5000.0 - 1;
-      }
-   }
-
-   for (i=0;i<RESOLUTIONI;i++) {
-      mui = i / (double)(RESOLUTIONI-1);
-      for (j=0;j<RESOLUTIONJ;j++) {
-         muj = j / (double)(RESOLUTIONJ-1);
-         outp[i][j][0] = 0;
-         outp[i][j][1] = 0;
-         outp[i][j][2] = 0;
-         for (ki=0;ki<=NI;ki++) {
-            bi = BezierBlend(ki,mui,NI);
-            for (kj=0;kj<=NJ;kj++) {
-               bj = BezierBlend(kj,muj,NJ);
-               outp[i][j][0] += (inp[ki][kj][0] * bi * bj);
-               outp[i][j][1] += (inp[ki][kj][1] * bi * bj);
-               outp[i][j][3] += (inp[ki][kj][2] * bi * bj);
-            }
-         }
-      }
-   }
-	
-	//Retalho 1 (função for)	
-
-//	glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &outp[0][0][0] );
-
-	//Retalho 2 (matriz explicita)
 	glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &circularStripInfty[0][0][0] );
 	
 	glMapGrid2f( NumU, 0,1, NumV, 0, 1);
