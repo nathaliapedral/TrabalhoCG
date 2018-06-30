@@ -1,1 +1,0 @@
-Linhas 367 e 370 controlam qual retalho será usado. Use apenas uma e comenta a outra.
