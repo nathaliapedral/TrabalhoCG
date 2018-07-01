@@ -1,34 +1,39 @@
 /*
 CG - Trabalho Final
 Grupo: Igor, Nathalia & Yves
-*** !!!! Falta descrição geral do programa (explicar o que faz) 
-* Usabilidade: Os comandos são controlados via teclado. Segue sua lista:
-** !!! FALTA TRADUÇÃO
- * CONTROLLING RESOLUTION OF THE NURBS MESH
- *   Press "U" to increase the number samples in U direction.
- *   Press "u" to decrease the number samples in U direction.
- *   Press "V" to increase the number samples in V direction.
- *   Press "v" to decrease the number samples in U direction.
- *   
- * CONTROLLING THE ANIMATION:
- *   Press the "a" key to toggle the animation off and on.
- *   Press the "s" key to perform a single step of the animation.
- *   The left and right arrow keys controls the
- *		rate of rotation around the y-axis.
- *   The up and down arrow keys increase and decrease the rate of 
- *		rotation around the x-axis.  In order to reverse rotational
- *		direction you must zero or reset the patch ("0" or "r").
- *   Press the "r" key to reset back to initial
- *		position, with no rotation.
- *   Press "0" (zero) to zero the rotation rates.
- *
- * COMMANDS SHOWING OPENGL FEATURES:
- *   Pressing "p" toggles between wireframe and polygon mode.
- *   Pressing "f" key toggles between flat and smooth shading.
- *
- *
- **/
 
+
+Esse trabalho procura ilustrar retalhos de Bezier através de 4 retalhos diferentes (um de cada vez).
+
+
+Usabilidade: Os comandos são controlados via teclado. Segue sua lista:
+
+1. Controle da resolução do retalho:
+	1.1 - Ao pressionar a tecla "U" (maiúsculo), a quantidade de amostras na direção U aumenta.
+	1.2 - Ao pressionar a tecla "u" (minúsculo), a quantidade de amostras na direção U diminui.
+	1.3 - Ao pressionar a tecla "V" (maiúsculo), a quantidade de amostras na direção V aumenta.
+	1.4 - Ao pressionar a tecla "v" (minúsculo), a quantidade de amostras na direção U diminui.
+
+2. Controle de animação (rotação):
+	2.1 - Pressione tecla "a" para ligar/desligar rotação.
+	2.2 - Pressione tecla "s" para movimento um passo de cada vez ("camera lenta").
+	2.3 - As teclas "<-" e "->" controlam a direção e velocidade da rotação no eixo y.
+	2.4 - As teclas de seta (para cima e para baixo) controlam a direção e velocidade da rotação no eixo s.
+	2.5 - Pressione tecla "r" para voltar ao esquema original de posição, antes de iniciar rotação.
+	2.6 - Pressione "0" (número zero) para zerar a velocidade de rotação.
+
+3. Zoom
+	3.1 - Pressione tecla "z" para aumentar o zoom.
+	3.2 - Pressione tecla "x" para diminuir o zoom.
+
+4. Preenchimento e sombra
+	4.1 - Ao pressionar a tecla "p", alterne as opções de preenchimento da superfície (GL_LINE ou GL_FILL).
+	4.2 - Ao pressionar a tecla "o", alterne as opções de sombra (GL_FLAT e GL_SMOOTH).
+
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "original.h"
 #include <math.h>
@@ -36,104 +41,63 @@ Grupo: Igor, Nathalia & Yves
 #include <GL/glut.h>	
 
 
-
-GLfloat zpos = -6;
-
-
-
-
-
-// Pontos para o retalho de Bezier
-
- 
-//ORIGINAL
-const float circularStripInfty[4][3][4] = {
+// Modelos de retalhos de Bezier
+const float obj1[4][3][4] = {
 	{ {-2, -1, 0, 1}, { 0, 0, 2, 0}, { 2, -1, 0, 1 } },
 	{ {-3, 0, 0, 1}, { 0, 0, 3, 0}, { 3, 0, 0, 1}},
 	{ {-1.5, 0.5, 0, 1}, { 0, 0, 1.5, 0}, {1.5, 0.5, 0, 1}},			
 	{ {-2, 1, 0, 1}, { 0, 0, 2, 0}, { 2,  1, 0, 1 } }
 };  
 
-
-/*
-// OPÇÃO 2  (site nehe)
-	const float circularStripInfty[16][1][3] = {
-	{-0.75, -0.75, -0.50},
-	{-0.25, -0.75, 0.00},
-	{0.25, -0.75, 0.00},
-	{0.75, -0.75, -0.50},
-	{-0.75, -0.25, -0.75},
-	{-0.25, -0.25, 0.50},
-	{0.25, -0.25, 0.50},
-	{0.75, -0.25, -0.75},
-	{-0.75, 0.25, 0.00},
-	{-0.25, 0.25, -0.50},
-	{0.25, 0.25, -0.50},
-	{0.75, 0.25, 0.00},
-	{-0.75, 0.75, -0.50},
-	{-0.25, 0.75, -1.00},
-	{0.25, 0.75, -1.00},
-	{0.75, 0.75, -0.50}
+const float obj2[16][1][3] = {
+	{{-0.75, -0.75, -0.50}},
+	{{-0.25, -0.75, 0.00}},
+	{{0.25, -0.75, 0.00}},
+	{{0.75, -0.75, -0.50}},
+	{{-0.75, -0.25, -0.75}},
+	{{-0.25, -0.25, 0.50}},
+	{{0.25, -0.25, 0.50}},
+	{{0.75, -0.25, -0.75}},
+	{{-0.75, 0.25, 0.00}},
+	{{-0.25, 0.25, -0.50}},
+	{{0.25, 0.25, -0.50}},
+	{{0.75, 0.25, 0.00}},
+	{{-0.75, 0.75, -0.50}},
+	{{-0.25, 0.75, -1.00}},
+	{{0.25, 0.75, -1.00}},
+	{{0.75, 0.75, -0.50}}
 
 };
-*/
 
-/*
-// OPÇÃO 3
-const float circularStripInfty[13][3][4] = {
+const float obj3[4][3][4] = {
 	{{4.0,2.0,2.0,1.0},{4.0,1.6,2.5,1.0},{4.0,2.0,3.0,1.0}},
     {{5.0,4.0,2.0,1.0},{5.0,4.0,2.5,1.0},{5.0,4.0,3.0,1.0}},
     {{6.0,5.0,2.0,1.0},{6.0,5.0,2.5,1.0},{6.0,5.0,3.0,1.0}},
     {{sqrt(12.0),sqrt(12.0),sqrt(4.0),sqrt(2.0)},
      {sqrt(12.0),sqrt(12.0),sqrt(5.0),sqrt(2.0)},
-     {sqrt(12.0),sqrt(12.0),sqrt(6.0),sqrt(2.0)}},
-    {{5.2,6.7,2.0,1.0},{5.2,6.7,2.5,1.0},{5.2,6.7,3.0,1.0}},
-    {{sqrt(8.0),sqrt(12.0),sqrt(4.0),sqrt(2.0)},
-     {sqrt(8.0),sqrt(12.0),sqrt(5.0),sqrt(2.0)},
-     {sqrt(8.0),sqrt(12.0),sqrt(6.0),sqrt(2.0)}},
-    {{4.0,5.2,2.0,1.0},{4.0,4.6,2.5,1.0},{4.0,5.2,3.0,1.0}},
-    {{sqrt(8.0),sqrt(12.0),sqrt(4.0),sqrt(2.0)},
-     {sqrt(8.0),sqrt(12.0),sqrt(5.0),sqrt(2.0)},
-     {sqrt(8.0),sqrt(12.0),sqrt(6.0),sqrt(2.0)}},
-    {{2.8,6.7,2.0,1.0},{2.8,6.7,2.5,1.0},{2.8,6.7,3.0,1.0}},
-    {{sqrt(4.0),sqrt(12.0),sqrt(4.0),sqrt(2.0)},
-     {sqrt(4.0),sqrt(12.0),sqrt(5.0),sqrt(2.0)},
-     {sqrt(4.0),sqrt(12.0),sqrt(6.0),sqrt(2.0)}},
-    {{2.0,5.0,2.0,1.0},{2.0,5.0,2.5,1.0},{2.0,5.0,3.0,1.0}},
-    {{3.0,4.0,2.0,1.0},{3.0,4.0,2.5,1.0},{3.0,4.0,3.0,1.0}},
-    {{4.0,2.0,2.0,1.0},{4.0,1.6,2.5,1.0},{4.0,2.0,3.0,1.0}}
+     {sqrt(12.0),sqrt(12.0),sqrt(6.0),sqrt(2.0)}}
 
 };
 
-*/
-
-
-/*
-//OPÇÃO 4   (BUGGADO)
-const float circularStripInfty[2][1][6] = {
-	{0.0,  0.5 , 1.0, 0.25, 0.75, 0.0},
-	{0.0, -0.25, 0.0, 0.5 , 0.75, 1.0}
-
-};
-*/
-
-
-/* 
-//OPÇÃO 5
-const float circularStripInfty[2][1][10] = {
+const float obj4[2][1][10] = {
 	{0.0, 1.0, 2.0, 3.0, 0.5, 1.5, 2.5, 0.5, 1.5, 0.0},
 	{0.0, 0.0, 0.0, 0.0, 1.0, 1.25, 1.5 , 2.0, 2.5, 3.0}
 
 };
-*/
-
 
 
 // Variaveis que controlam o refinamento do retalho
-int NumU = 4;
-int NumV = 4;
+int NumU1 = 4;
+int NumV1 = 4;
+int NumU2 = 8;
+int NumV2 = 8;
+
+
 
 const float PI2 = 2.0f*3.1415926535f;
+int obj;
+GLfloat zpos = -6; // Posição z inicial (usado para zoom)
+
 
 GLenum shadeModel = GL_FLAT;		// Podendo alternar entre GL_FLAT e GL_SMOOTH
 GLenum polygonMode = GL_LINE;		// Podendo alternar entre GL_LINE e GL_FILL
@@ -158,16 +122,31 @@ float Lt1diff[4] = {0.6, 0.6, 0.6, 1.0};
 float Lt1spec[4] = {1.0, 1.0, 1.0, 1.0};
 float Lt1pos[4] = {0.0, 1.0, 1.0, 0.0};			// Luz direcional
 
-// Variveis brilho/reflexão   !!!!!!!!! explicar melhor !!!!!!!!!!!
+// Variveis brilho/reflexão   
 float Noemit[4] = {0.0, 0.0, 0.0, 1.0};
 float Matspec[4] = {1.0, 1.0, 1.0, 1.0};
 float Matnospec[4] = {0.8, 0.05, 0.4, 1.0};		// Sombra
 float Matshine = 50.0;					// Controla intensidade do brilho
 
+void menuHelp(){
+
+	printf("\n\n\n\tCONTROLAR A ANIMAÇÃO:\n");
+	printf("\t\tPressione 'a' para ativar e desativar animação\n");
+	printf("\t\tPressione 's' para executar um passo da animação\n");
+	printf("\t\tPressione'->' ou '<-' para rotacionar no eixo y\n");
+	printf("\t\tPressione '/\' '\\/' para rotacionar no eixo x\n");
+	printf("\t\tPressione '0' para resetar a direção da rotação\n");
+	printf("\t\tPressione 'r' para resetar o retalho\n\n\n");
+	printf("\tCONTROLES DO OPENGL:\n");
+	printf("\t\tPressione 'p' para trocar entre modo polígono e modo wireframe\n");
+	printf("\t\tPressione 'f' para trocar entre shading flat e shading smooth\n\n");
+	printf("\tPressione ESC para sair");
+
+
+}
 
 // Comandos do teclado
-void keyboardFunc( unsigned char key, int x, int y ) 
-{
+void keyboardFunc( unsigned char key, int x, int y ) {
 	switch ( key ) {
 	case 'a':
 		runMode = !runMode;
@@ -185,7 +164,7 @@ void keyboardFunc( unsigned char key, int x, int y )
 	case '0':			// Zera a rotacao
 		ZeroRotation();
 		break;
-	case 'f':			// Gradação --> alterna entre GL_FLAT e GL_SMOOTH
+	case 'f':			//  alterna entre GL_FLAT e GL_SMOOTH
 		ShadeModelFunc();
 		break;
 	case 'p':			// Formato do poligono --> alterna entre GL_LINE e GL_FILL
@@ -209,12 +188,15 @@ void keyboardFunc( unsigned char key, int x, int y )
 	case 'x':
 		zpos --;
 		return;
+	case 'h':
+		menuHelp();
+		return;
 	}
+	
 }
 
 // Trata as quatro possibilidades de movimentos rotacionais (cima,baixo,esquerda,direita)
-void rotKeyFunc( int key, int x, int y ) 
-{
+void rotKeyFunc( int key, int x, int y ) {
 	switch ( key ) {
 	case GLUT_KEY_UP:				
 		KeyUp();		// Aumenta rotação para cima ou diminui rotação para baixo
@@ -231,18 +213,11 @@ void rotKeyFunc( int key, int x, int y )
 	}
 }
 
-
 // As quatro funções: KeyUp, KeyDown, KeyLeft e KeyRight limitam a mudança de direção de rotação apenas com "reset"
 void KeyUp() {
     if ( RotIncX == 0.0 ) {
 		RotIncX = -0.1;		// Inicialmente 1/10 degrau de rotação por update (isso se repete para as 3 seguintes funções)
 	}
-/*	else if ( RotIncX < 0.0f) {
-		RotIncX *= RotIncFactor;
-	}
-	else {
-		RotIncX /= RotIncFactor;
-	}	*/
 }
 
 void KeyDown() {
@@ -269,8 +244,7 @@ void KeyLeft() {
 	}	
 }
 
-void KeyRight()
-{
+void KeyRight() {
     if ( RotIncY == 0.0 ) {
 		RotIncY = 0.1;		
 	}
@@ -315,47 +289,46 @@ void FillModeFunc() {
 
 // Incrementa "u"
 void IncU() {
-	NumU++;
+	NumU1++;
 }
 
 // Decrementa "u"
 void DecU() {
-	if (NumU>4) {
-		NumU--;
+	if (NumU1>4) {
+		NumU1--;
 	}
 }
 
 // Incrementa "v"
 void IncV() {
-	NumV++;
+	NumV1++;
 }
 
 // Decrementa "v"
 void DecV() {
-	if (NumV>4) {
-		NumV--;
+	if (NumV1>4) {
+		NumV1--;
 	}
 }
 
-void updateScene( void )
-{
+void updateScene( void ) {
 	// Clear the rendering window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glShadeModel( shadeModel );	// Set the shading to flat or smooth.
-	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);	// Set to be "wire" or "solid"
+	glShadeModel( shadeModel );	// Especifica tonalidade da sombra alterna entre GL_FLAT e GL_SMOOTH
+	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);	// Especifica rasterização do poligono (deixar suas linhas ou preencher por completo)
 
-	// Bezier Patch Materials
+	// Especifica materiais do retalho (iluminação)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, Matnospec);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Matspec);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, Matshine);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, Noemit);
 
-	glPushMatrix();		// Save to use again next time.
+	glPushMatrix();		
 
-	glTranslatef(.0f, 0.f, zpos);
+	glTranslatef(.0f, 0.f, zpos); // Matriz de translação (zoom in ou zoom out, dependendo do valor de zpos)
 
-	// Update the orientation, if the animation is running.
+	// Atualiza orientação, case alguma animação (rotação) esteja ocorrendo.
 	if ( runMode ) {
 		RotY += RotIncY;
 		if ( fabs(RotY)>360.0 ) {
@@ -366,56 +339,71 @@ void updateScene( void )
 			RotX -= 360.0*((int)(RotX/360.0));
 		}
 	}
-	// Set the orientation.
+	// Define orientação (eixo x e eixo y)
 	glRotatef( RotX, 1.0, 0.0, 0.0);
 	glRotatef( RotY, 0.0, 1.0, 0.0);
 
-	// Draw the Bezier patch
- 	glEnable(GL_MAP2_VERTEX_4);
+	// Desenha retalho Bezier
+	glEnable(GL_MAP2_VERTEX_4);
 
-	glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &circularStripInfty[0][0][0] );
+	if (obj == 1){
+		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &obj1[0][0][0] );	 // Define mapeamento linear da grade.
+		glMapGrid2f( NumU1, 0,1, NumV1, 0, 1); 							// Define quantidade de partições.
+		glEvalMesh2(GL_FILL, 0,NumU1, 0, NumV1);
+	}
+
+	if (obj == 2){
+		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &obj2[0][0][0] );	
+		glMapGrid2f( NumU2, 0,1, NumV2, 0, 1);
+		glEvalMesh2(GL_FILL, 0,NumU2, 0, NumV2);
+	}
+
+	if (obj == 3){
+		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &obj3[0][0][0] );	
+		glMapGrid2f(NumU1, 0,1, NumV1, 0, 1);
+		glEvalMesh2(GL_FILL, 0,NumU1, 0,NumV1 );
+	}
+
+	if (obj == 4){
+		glMap2f(GL_MAP2_VERTEX_4, 0,1,4,3, 0,1,12,4, &obj4[0][0][0] );	
+		glMapGrid2f( NumU2, 0,1, NumV2, 0, 1);
+		glEvalMesh2(GL_FILL, 0,NumU2, 0, NumV2);
+	}
+
+	glPopMatrix();		
+
 	
-	glMapGrid2f( NumU, 0,1, NumV, 0, 1);
-	glEvalMesh2(GL_FILL, 0,NumU, 0, NumV);
-
-	glPopMatrix();		// Restore to original matrix as set in resizeWindow()
-
-	// Flush the pipeline, swap the buffers
     glFlush();
     glutSwapBuffers();
 }
 
-// Initialize OpenGL
-void initRendering()
-{
+// Inicializa OpenGL (iluminação)
+void initRendering() {
+
     glEnable( GL_DEPTH_TEST );
 	glEnable( GL_AUTO_NORMAL );
 
-	glEnable(GL_LIGHTING);		// Enable lighting calculations
-	glEnable(GL_LIGHT0);		// Turn on lights (unnecessary here, since also in Animate()
+	glEnable(GL_LIGHTING);		
+	glEnable(GL_LIGHT0);		
 	glEnable(GL_LIGHT1);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);	// Ambient light
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);	// Luz Ambiente
 
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);		// Phong light backsides
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);		// Phong 
 
-	// Next line is suspicious, perhaps compensating for OpenGL bug	
-	glFrontFace(GL_CW);					// Is needed for Bezier Patches (OpenGL bug??)
+	glFrontFace(GL_CW);					
 
-	// Light 0 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, Lt0amb);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, Lt0diff);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, Lt0spec);
 	glLightfv(GL_LIGHT0, GL_POSITION, Lt0pos);
 
-	// Light 1 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, Lt1amb);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, Lt1diff);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, Lt1spec);
 	glLightfv(GL_LIGHT1, GL_POSITION, Lt1pos);
 }
 
-// Called when the window is resized
-//		Sets up the projection view matrix (somewhat poorly, however)
+// Efetua mudança nas dimensões da janela (aumentando ou diminuindo de acordo com ação do mouse).
 void resizeWindow(int w, int h)
 {
     float aspectRatio;
@@ -423,50 +411,61 @@ void resizeWindow(int w, int h)
 	h = (w == 0) ? 1 : h;
 	aspectRatio = (float)w/(float)h;
 
-	// Set up the proection view matrix
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     gluPerspective( 60.0, aspectRatio, 1.0, 30.0 );
 
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
-	// Move system 10 units away to be able to view from the origin.
-	glTranslatef(0.0, 0.0, -10.0);
+	
+	// Seleciona uma visualização diferente para cada objeto
+	if (obj == 1){
+		glTranslatef(0.0, 0.0, -0.5);
+		glRotatef(5.0, 1.0,0.0,0.0);	 
+	}
+	if (obj == 2){
+		glTranslatef(-10.0, 0.0, -20.0);
+		glRotatef(0.0, 1.0,0.0,0.0);	 
+	}
+	if (obj == 4){
+		glTranslatef(0.0, 0.0, -10.0);
+		glRotatef(15.0, 1.0,0.0,0.0);	 
+	}
+	if (obj == 3){
+		glTranslatef(-3.0, -3.0, -5.0);
+		glRotatef(15.0, 1.0,0.0,0.0);	 
+	}
+		 
+}
 
-	// Tilt system 15 degrees downward in order to view from above 
-	//   the xy-plane.
-	glRotatef(15.0, 1.0,0.0,0.0);	 
+void chooseObj(){
+	printf("\n\n\n\t**********APLICAÇÃO DE BEZIER*************\n\n");
+	printf("\t Selecione um modelo (1,2,3 ou 4): ");
+		scanf("%d", &obj);
 }
 
 
-// Main routine
-// Set up OpenGL, hook up callbacks, and start the main loop
+
+
 int main( int argc, char** argv )
 {
+	chooseObj();
 	glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
 	// Posicao e tamanho da janela
     glutInitWindowPosition( 10, 60 );
-    glutInitWindowSize( 500, 500 );
-    glutCreateWindow( "Versao 1 - Bezier aplicacao" );
-
-	// Initialize OpenGL rendering modes
+    glutInitWindowSize( 800, 600 );
+    glutCreateWindow( "CG Trabalho Final - Bezier aplicacao" );
     initRendering();
-	resizeWindow(500,500);
+	resizeWindow(800,600);
 
-	// Set up callback functions for key presses
 	glutKeyboardFunc( keyboardFunc );
 	glutSpecialFunc( rotKeyFunc );
-
-	// Set up the callback function for resizing windows
     glutReshapeFunc( resizeWindow );
-
-	// Call this for background processing
 	glutIdleFunc( updateScene );
-	// Call this whenever window needs redrawing
     glutDisplayFunc( updateScene );
-	
+
 	glutMainLoop(  );
 
     return(0);	
