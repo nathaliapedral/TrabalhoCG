@@ -1,0 +1,49 @@
+\begin{DoxyAuthor}{Author}
+Grupo (ordem alfabética)\+: Igor, Nathália \& Yves
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+30/08/2018
+\end{DoxyDate}
+Esse trabalho procura ilustrar superficies de Bezier através de 4 retalhos diferentes (um de cada vez).
+
+Usabilidade\+: Os comandos são controlados via teclado. Segue sua lista\+:
+
+Controle da resolução do retalho\+:
+\begin{DoxyItemize}
+\item Ao pressionar a tecla \char`\"{}\+U\char`\"{} (maiúsculo), a quantidade de amostras na direção U aumenta.
+\item Ao pressionar a tecla \char`\"{}u\char`\"{} (minúsculo), a quantidade de amostras na direção U diminui.
+\item Ao pressionar a tecla \char`\"{}\+V\char`\"{} (maiúsculo), a quantidade de amostras na direção V aumenta.
+\item Ao pressionar a tecla \char`\"{}v\char`\"{} (minúsculo), a quantidade de amostras na direção U diminui.
+\end{DoxyItemize}
+
+Controle de animação (rotação)\+:
+\begin{DoxyItemize}
+\item Pressione tecla \char`\"{}a\char`\"{} para ligar/desligar rotação.
+\item Pressione tecla \char`\"{}s\char`\"{} para movimento um passo de cada vez (\char`\"{}camera lenta\char`\"{}).
+\item As teclas \char`\"{}$<$-\/\char`\"{} e \char`\"{}-\/$>$\char`\"{} controlam a direção e velocidade da rotação no eixo y.
+\item As teclas de seta (para cima e para baixo) controlam a direção e velocidade da rotação no eixo s.
+\item Pressione tecla \char`\"{}r\char`\"{} para voltar ao esquema original de posição, antes de iniciar rotação.
+\item Pressione \char`\"{}0\char`\"{} (número zero) para zerar a velocidade de rotação.
+\end{DoxyItemize}
+
+Zoom\+:
+\begin{DoxyItemize}
+\item Pressione tecla \char`\"{}z\char`\"{} para aumentar o zoom.
+\item Pressione tecla \char`\"{}x\char`\"{} para diminuir o zoom.
+\end{DoxyItemize}
+
+Preenchimento e sombra\+:
+\begin{DoxyItemize}
+\item Ao pressionar a tecla \char`\"{}p\char`\"{}, alterne as opções de preenchimento da superfície (G\+L\+\_\+\+L\+I\+N\+E ou G\+L\+\_\+\+F\+I\+L\+L).
+\item Ao pressionar a tecla \char`\"{}o\char`\"{}, alterne as opções de sombra (G\+L\+\_\+\+F\+L\+A\+T e G\+L\+\_\+\+S\+M\+O\+O\+T\+H).
+\end{DoxyItemize}
+
+Para rodar o programa basta digitar os seguintes comandos na linha de comando\+:
+
+\begin{quote}
+gcc -\/o Trabalho\+Final \hyperlink{TrabalhoFinal_8c}{Trabalho\+Final.\+c} -\/l\+G\+L -\/l\+G\+L\+U -\/lglut -\/lm \begin{quote}
+./\+Trabalho\+Final \end{quote}
+\end{quote}
+
+
+O\+B\+S\+: O programa foi desenvolvido usando Open\+G\+L 3. 
