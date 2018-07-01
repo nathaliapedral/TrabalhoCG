@@ -1,0 +1,16 @@
+O nome do arquivo que inicializa a documentação do código é "index.html", que se encontra dentro da pasta "html" que se encontra dentro de "Documentacao".
+Para acessar a documentação do código:
+
+$ cd /Trabalho Final/Documentacao/html 
+$ cd google-chrome index.html
+
+
+
+Para rodar o programa basta digitar os seguintes comandos na linha de comando:
+
+> gcc -o TrabalhoFinal TrabalhoFinal.c -lGL -lGLU -lglut -lm
+>> ./TrabalhoFinal
+
+
+
+Para testar cada retalho, basta descomentar uma das matrizes "controlPoints" que contem os pontos de controle a serem manipuladas.
